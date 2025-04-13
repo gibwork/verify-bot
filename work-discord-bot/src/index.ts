@@ -143,7 +143,7 @@ client.on(Events.InteractionCreate, async (interaction: Interaction) => {
 
 // Function to handle button interactions
 async function handleButtonInteraction(interaction: ButtonInteraction) {
-  const [action, userId] = interaction.customId.split(':');
+  const [action] = interaction.customId.split(':');
   
   if (action === 'new_wallet' || action === 'add_wallet') {
     // Generate a unique verification code
