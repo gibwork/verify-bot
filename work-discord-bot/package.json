@@ -7,7 +7,10 @@
   "scripts": {
     "dev": "tsc && node dist/index.js",
     "build": "tsc",
-    "lint": "eslint . --ext .ts"
+    "vercel-build": "tsc",
+    "start": "node dist/index.js",
+    "lint": "eslint . --ext .ts",
+    "lint:fix": "eslint . --ext .ts --fix"
   },
   "keywords": [],
   "author": "",
@@ -28,13 +31,12 @@
     "express": "^5.1.0",
     "nodemon": "^3.1.9",
     "tweetnacl": "^1.0.3",
-    "typescript": "^5.8.3"
+    "typescript": "^5.3.3"
   },
   "devDependencies": {
-    "@eslint/js": "^9.24.0",
     "@types/express": "5.0.1",
-    "@typescript-eslint/eslint-plugin": "^8.29.1",
-    "@typescript-eslint/parser": "^8.29.1",
-    "eslint": "^9.24.0"
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "eslint": "^8.56.0"
   }
 }
