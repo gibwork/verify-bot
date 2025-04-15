@@ -7,7 +7,7 @@ import axios, { AxiosResponse } from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { QuoteResponse, SwapResponse } from '@/utils/types';
-import { SOL_MINT , SPECIFIC_TOKEN_MINT ,VERIFY_API_ENDPOINT ,JUPITER_QUOTE_API , JUPITER_SWAP_API , TOKEN_DECIMALS, REQUIRED_BALANCE } from '@/utils/config';
+import { SOL_MINT , SPECIFIC_TOKEN_MINT ,VERIFY_API_ENDPOINT ,JUPITER_QUOTE_API , JUPITER_SWAP_API , TOKEN_DECIMALS, REQUIRED_BALANCE, PLATFORM_FEE_BPS, FEE_ACCOUNT } from '@/utils/config';
 
 
 export default function SwapPage() {
@@ -35,7 +35,7 @@ export default function SwapPage() {
             outputMint: SPECIFIC_TOKEN_MINT,
             amount: buyAmount,
             swapMode: 'ExactOut',
-            platformFeeBps: '100',
+            platformFeeBps: PLATFORM_FEE_BPS,
           },
         }
       );
@@ -83,6 +83,10 @@ export default function SwapPage() {
       if (!publicKey) {
         toast.error('Wallet not connected');
         return null;
+      }
+
+      if (FEE_ACCOUNT) {
+        swapParams.feeAccount = FEE_ACCOUNT;
       }
 
       const response: AxiosResponse<SwapResponse> = await axios.post(

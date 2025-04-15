@@ -9,7 +9,7 @@ import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Buffer } from 'buffer';
-import { SPECIFIC_TOKEN_MINT , REQUIRED_BALANCE , SOL_MINT , VERIFY_API_ENDPOINT , JUPITER_QUOTE_API , JUPITER_SWAP_API } from "@/utils/config";
+import { SPECIFIC_TOKEN_MINT , REQUIRED_BALANCE , SOL_MINT , VERIFY_API_ENDPOINT , JUPITER_QUOTE_API , JUPITER_SWAP_API, FEE_ACCOUNT, PLATFORM_FEE_BPS } from "@/utils/config";
 import { TokenBalance , SignatureData , QuoteResponse , SwapResponse} from "@/utils/types";
 
 if (typeof window !== 'undefined' && typeof window.Buffer === 'undefined') {
@@ -222,6 +222,7 @@ export default function VerifyContent() {
         slippageBps: 50,
         swapMode: 'ExactOut',
         onlyDirectRoutes: false,
+        platformFeeBps: PLATFORM_FEE_BPS,
       };
 
       const response = await axios.get<QuoteResponse>(JUPITER_QUOTE_API, { params });
@@ -253,6 +254,10 @@ export default function VerifyContent() {
         wrapAndUnwrapSol: true,
         prioritizationFeeLamports: "auto",
       };
+
+      if (FEE_ACCOUNT) {
+        Object.assign(payload, { feeAccount: FEE_ACCOUNT });
+      }
 
       const response = await axios.post<SwapResponse>(JUPITER_SWAP_API, payload, {
         headers: { 'Content-Type': 'application/json' },
