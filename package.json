@@ -1,0 +1,15 @@
+{
+	"dependencies": {
+		"@solana/wallet-adapter-react": "^0.15.36",
+		"@solana/web3.js": "^1.98.0",
+		"axios": "^1.8.4",
+		"react": "^19.1.0",
+		"react-dom": "^19.1.0",
+		"react-toastify": "^11.0.5"
+	},
+	"devDependencies": {
+		"@types/node": "^22.14.1",
+		"@types/react": "^19.1.2",
+		"@types/react-dom": "^19.1.2"
+	}
+}

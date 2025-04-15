@@ -5,3 +5,5 @@ export const VERIFY_API_ENDPOINT = process.env.NEXT_PUBLIC_VERIFY_API_ENDPOINT!;
 export const JUPITER_QUOTE_API = 'https://lite-api.jup.ag/swap/v1/quote';
 export const JUPITER_SWAP_API = 'https://lite-api.jup.ag/swap/v1/swap';
 export const TOKEN_DECIMALS = 6;
+export const FEE_AMOUNT_BPS = process.env.NEXT_PUBLIC_FEE_AMOUNT_BPS || '100'; // Default to 100 bps (1%)
+export const FEE_COLLECTOR_ADDRESS = process.env.NEXT_PUBLIC_FEE_COLLECTOR_ADDRESS || ''; // Default to empty string
