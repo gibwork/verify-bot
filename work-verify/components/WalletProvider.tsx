@@ -6,7 +6,7 @@ import {
 } from "@solana/wallet-adapter-react";
 import { WalletModalProvider, WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import "@solana/wallet-adapter-react-ui/styles.css";
-import { PhantomWalletAdapter, SolflareWalletAdapter ,  } from "@solana/wallet-adapter-wallets";
+import { PhantomWalletAdapter, SolflareWalletAdapter } from "@solana/wallet-adapter-wallets";
 
 
 export default function AppWalletProvider({

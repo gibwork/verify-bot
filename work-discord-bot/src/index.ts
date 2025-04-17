@@ -237,6 +237,13 @@ async function handleCommandInteraction(interaction: CommandInteraction) {
           .setCustomId(`add_wallet:${interaction.user.id}`)
       );
     }
+
+    row.addComponents(
+      new ButtonBuilder()
+        .setLabel(`Buy ${REQUIRED_BALANCE/1000}k WORK`)
+        .setStyle(ButtonStyle.Link)
+        .setURL(`${CLIENT_URL}/buy`)
+    );
     
     await interaction.reply({ 
       content: '**Wallet Verification**\nSelect an option below to manage your wallet verification:',
