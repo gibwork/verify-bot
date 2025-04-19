@@ -40,3 +40,11 @@ export interface PlatformFee {
     amount: string;
     feeBps: number;
 }
+
+export interface ServerVerificationConfig {
+  tokenAddress: string;
+  requiredBalance: string;
+  tokenSymbol?: string;
+  tokenDecimals: number;
+  serverName?: string;
+}
