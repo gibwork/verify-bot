@@ -32,13 +32,14 @@ describe('signMessageWithWallet', () => {
     expect(wallet.signMessage).toHaveBeenCalled();
   });
 
-  it('should handle Ledger through Phantom correctly', async () => {
+  it('should reject Phantom + Ledger combination immediately', async () => {
     const wallet = createMockWallet('Phantom');
     const result = await signMessageWithWallet('Verify with Ledger: test', wallet);
     
-    expect(result.success).toBe(true);
-    expect(result.signature).toBeDefined();
-    expect(wallet.signMessage).toHaveBeenCalled();
+    expect(result.success).toBe(false);
+    expect(result.error).toContain("Phantom wallet with Ledger device currently doesn't support message signing");
+    expect(result.error).toContain("Please use Solflare wallet instead");
+    expect(wallet.signMessage).not.toHaveBeenCalled();
   });
 
   it('should handle direct Ledger wallet correctly', async () => {
@@ -59,13 +60,13 @@ describe('signMessageWithWallet', () => {
     expect(result.error).toContain('Make sure your Ledger device is unlocked');
   });
 
-  it('should handle Phantom-Ledger errors with helpful messages', async () => {
+  it('should handle Phantom-Ledger errors with clear message', async () => {
     const wallet = createMockWallet('Phantom', false, 'Ledger device: user rejected');
     const result = await signMessageWithWallet(mockMessage, wallet);
     
     expect(result.success).toBe(false);
     expect(result.error).toContain('Failed to sign with Phantom');
-    expect(result.error).toContain('Try using Solflare wallet');
+    expect(result.error).toContain('currently does not support message signing with Ledger devices');
   });
 
   it('should handle wallets that do not support signing', async () => {
