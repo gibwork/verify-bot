@@ -11,6 +11,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { Buffer } from 'buffer';
 import { SPECIFIC_TOKEN_MINT , REQUIRED_BALANCE , SOL_MINT , DISCORD_API_URL , JUPITER_QUOTE_API , JUPITER_SWAP_API } from '@/utils/config';
 import { TokenBalance , SignatureData , QuoteResponse , SwapResponse} from "@/utils/types";
+import { signMessageWithWallet } from '@/utils/signing';
 
 if (typeof window !== 'undefined' && typeof window.Buffer === 'undefined') {
   window.Buffer = Buffer;
@@ -130,18 +131,28 @@ export default function VerifyContent() {
     try {
       setSigningMessage(true);
       setVerificationError(null);
+      
       const messageString = `Verify wallet ownership for Discord role: ${verificationCode}`;
-      const encodedMessage = new TextEncoder().encode(messageString);
-      const signature = await signMessage(encodedMessage);
+      const result = await signMessageWithWallet(messageString, {
+        signMessage,
+        wallet: wallet,
+        publicKey,
+        connected
+      });
+
+      if (!result.success || !result.signature) {
+        throw new Error(result.error || 'Failed to sign message');
+      }
+
       setSignatureData({
-        signature: Buffer.from(signature).toString('base64'),
+        signature: result.signature,
         message: messageString
       });
       toast.success("Message signed successfully!");
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error signing message:', err);
-      setVerificationError("Failed to sign message with wallet");
-      toast.error("Failed to sign message with wallet. Please try again.");
+      setVerificationError(err.message || "Failed to sign message with wallet");
+      toast.error(`${err.message || "Failed to sign message with wallet"}. Please try again.`);
       setSignatureData(null);
     } finally {
       setSigningMessage(false);
