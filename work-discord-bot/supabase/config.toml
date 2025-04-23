@@ -1,0 +1,5 @@
+[work-discord-bot]
+ref = "placeholder-ref"
+
+[api]
+url = "https://placeholder.supabase.co"
