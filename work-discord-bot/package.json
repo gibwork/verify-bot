@@ -5,7 +5,12 @@
   "main": "index.js",
   "scripts": {
     "dev": "tsc && node dist/index.js",
-    "build": "tsc"
+    "build": "tsc",
+    "migration:new": "supabase migration new",
+    "migration:up": "supabase db push",
+    "migration:down": "supabase db reset",
+    "migration:list": "supabase migration list",
+    "migration:repair": "supabase migration repair"
   },
   "keywords": [],
   "author": "",
@@ -26,9 +31,11 @@
     "express": "^5.1.0",
     "nodemon": "^3.1.9",
     "tweetnacl": "^1.0.3",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "work-discord-bot": "file:"
   },
   "devDependencies": {
-    "@types/express": "5.0.1"
+    "@types/express": "5.0.1",
+    "supabase": "^2.22.4"
   }
 }

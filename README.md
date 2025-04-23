@@ -13,7 +13,7 @@ This project allows Discord server administrators to create token-gated roles, w
 - Checks token balances on the Solana blockchain
 - Assigns Discord roles based on token holdings
 - Periodically checks balances to add/remove roles as needed
-- Stores user data in a Supabase database
+- Stores user data in a Supabase database with automated migrations
 
 ## Live Demo
 
@@ -76,21 +76,37 @@ DISCORD_TOKEN=your_discord_bot_token
 CLIENT_ID=your_discord_application_id
 GUILD_ID=your_discord_server_id
 ROLE_ID=your_role_id
-SUPABASE_URL=your_supabase_url
-SUPABASE_KEY=your_supabase_key
+SUPABASE_URL=your_supabase_project_url
+SUPABASE_KEY=your_supabase_anon_key
+SUPABASE_DB_PASSWORD=your_database_password
+SUPABASE_PROJECT_REF=your_project_reference
+SUPABASE_ACCESS_TOKEN=your_access_token
 SOLANA_RPC_URL=your_solana_rpc_url
 CLIENT_URL=http://localhost:3000
 PORT=3001
+DISCORD_CLIENT_ID=your_discord_oauth_client_id
+DISCORD_CLIENT_SECRET=your_discord_oauth_client_secret
 ```
 
 ## Database Setup
 
-The project uses Supabase as its database. Follow these steps to set up your database:
+The project uses Supabase as its database with automated migrations. Follow these steps to set up your database:
 
 1. Create a Supabase project at [supabase.com](https://supabase.com)
-2. In the Supabase dashboard, go to the SQL Editor
-3. Create a new query and paste the following SQL to create the required table:
+2. Set up the Supabase CLI:
+```bash
+cd work-discord-bot
+pnpm add -D supabase
+pnpm supabase login
+```
 
+3. Initialize and apply migrations:
+```bash
+# Apply initial migration
+pnpm migration:up
+```
+
+The initial migration will create the following schema:
 ```sql
 CREATE TABLE holders (
   id SERIAL PRIMARY KEY,
@@ -98,12 +114,32 @@ CREATE TABLE holders (
   discord_user_id TEXT UNIQUE NOT NULL,
   address TEXT[] NOT NULL,
   active BOOLEAN DEFAULT FALSE,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  last_verified_at TIMESTAMP WITH TIME ZONE
 );
 ```
 
-4. Run the query to create the table
-5. Copy your Supabase URL and anon key from the Settings > API section to use in your `.env` file
+For detailed information about the migrations system, see [work-discord-bot/supabase/README.md](work-discord-bot/supabase/README.md).
+
+### Migration Commands
+
+```bash
+# Create a new migration
+pnpm migration:new <name>
+
+# Apply migrations
+pnpm migration:up
+
+# Rollback migrations
+pnpm migration:down
+
+# List migrations
+pnpm migration:list
+
+# Fix migration issues
+pnpm migration:repair
+```
 
 ## Running the Application
 
@@ -181,6 +217,11 @@ Contributions are welcome! Here's how you can contribute:
 4. Push to the branch: `git push origin feature/my-feature`
 5. Submit a pull request
 
+When making database changes:
+1. Create a new migration: `pnpm migration:new your_change`
+2. Test the migration locally
+3. Include migration files in your PR
+
 Please make sure to update tests as appropriate and follow the code style of the project.
 
 ## Project Structure
@@ -199,6 +240,10 @@ Please make sure to update tests as appropriate and follow the code style of the
 
 - `src/`: Source code
   - `index.ts`: Main bot application
+- `supabase/`: Database migrations
+  - `migrations/`: Migration files
+  - `config.toml`: Supabase configuration
+  - `README.md`: Migrations documentation
 
 ## Troubleshooting
 
@@ -218,6 +263,12 @@ Please make sure to update tests as appropriate and follow the code style of the
    - Verify that the bot has permission to manage roles
    - Check if the role ID in the .env file is correct
    - Ensure the bot's role is higher than the role it's trying to assign
+
+4. **Database Migration Issues**
+   - Check migration logs with `pnpm migration:list`
+   - Use `pnpm migration:repair` for inconsistencies
+   - Ensure you have the latest migrations
+   - Backup data before running migrations in production
 
 ## License
 
