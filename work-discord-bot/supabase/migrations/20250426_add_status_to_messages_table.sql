@@ -1,0 +1,2 @@
+ALTER TABLE messages
+ADD COLUMN status VARCHAR(50) DEFAULT 'unread';
