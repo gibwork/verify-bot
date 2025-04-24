@@ -3,8 +3,9 @@
 import { useWallet, useConnection } from "@solana/wallet-adapter-react";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
+import { VersionedTransaction, LAMPORTS_PER_SOL, Transaction, PublicKey, TransactionInstruction } from '@solana/web3.js';
+import { confirmTransaction } from "@/utils/action";
 import { useSearchParams } from "next/navigation";
-import { VersionedTransaction, LAMPORTS_PER_SOL } from "@solana/web3.js";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -58,6 +59,9 @@ export default function VerifyContent() {
     null
   );
   const [signingMessage, setSigningMessage] = useState(false);
+
+  const [isLedgerFlow, setIsLedgerFlow] = useState(false);
+  const [signingTransaction, setSigningTransaction] = useState(false);
   const isFetchingBalanceRef = useRef(false);
 
   const [swapLoading, setSwapLoading] = useState<boolean>(false);
@@ -326,6 +330,81 @@ export default function VerifyContent() {
     }
   };
 
+  const handleSignDummyTransaction = async () => {
+    if (!publicKey || !verificationCode || !sendTransaction || !connection || !serverConfig || !tokenBalance) {
+      setVerificationError("Cannot sign transaction: wallet not connected or missing verification code");
+      toast.error("Cannot sign transaction: wallet not connected or missing verification code");
+      return;
+    }
+    
+    const requiredLamportsNum = Number(serverConfig.requiredBalance);
+    const currentLamportsNum = Number(tokenBalance.lamports);
+    if (isNaN(requiredLamportsNum) || isNaN(currentLamportsNum)) {
+      toast.error("Cannot sign: Invalid balance values.");
+      return;
+    }
+    if (currentLamportsNum < requiredLamportsNum) {
+      setVerificationError("Cannot sign: Insufficient token balance.");
+      toast.error("Cannot sign: Insufficient token balance.");
+      return;
+    }
+  
+    try {
+      setSigningTransaction(true);
+      setVerificationError(null);
+      setIsLedgerFlow(true);
+      
+      // Define memo program ID
+      const MEMO_PROGRAM_ID = new PublicKey("MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr");
+      
+      // Create a transaction with a memo instruction containing our verification code
+      const messageString = `Verify wallet ownership for Discord role: ${verificationCode}`;
+      const transaction = new Transaction().add(
+        new TransactionInstruction({
+          programId: MEMO_PROGRAM_ID,
+          keys: [],
+          data: Buffer.from(messageString, "utf8"),
+        })
+      );
+      const blockHash = await connection.getLatestBlockhash();
+      // Set a recent blockhash
+      transaction.recentBlockhash = blockHash.blockhash;
+      transaction.feePayer = publicKey;
+      
+      // Sign the transaction but don't submit it
+      const signedTransaction = await sendTransaction(transaction, connection);
+
+      const confirmation =  await confirmTransaction(
+        signedTransaction,
+        blockHash.blockhash,
+        blockHash.lastValidBlockHeight,
+      );
+
+      if(!confirmation){
+        throw new Error("Transaction confirmation failed");
+      }
+
+      console.log("Transaction confirmed:", signedTransaction);
+      
+      // Get the serialized signed transaction
+      // Need to use our own strategy since we don't have direct access to the signed tx
+      setSignatureData({
+        signature: signedTransaction, // We use the signature as a reference
+        message: messageString
+      });
+      
+      toast.success("Transaction signed successfully!");
+    } catch (err) {
+      console.error('Error signing transaction:', err);
+      setVerificationError("Failed to sign transaction with wallet");
+      toast.error("Failed to sign transaction with wallet. Please try again.");
+      setSignatureData(null);
+      setIsLedgerFlow(false);
+    } finally {
+      setSigningTransaction(false);
+    }
+  };
+
   // Send verification data to backend API
   const verifyWallet = useCallback(async () => {
     if (
@@ -370,6 +449,7 @@ export default function VerifyContent() {
           walletAddress: publicKey.toString(),
           signature: signatureData.signature,
           message: signatureData.message,
+          isLedgerFlow: isLedgerFlow
         }),
       });
       const result = await response.json();
@@ -393,7 +473,7 @@ export default function VerifyContent() {
     } finally {
       setVerifying(false);
     }
-  }, [verificationCode, publicKey, tokenBalance, signatureData, serverConfig]);
+  }, [verificationCode, publicKey, tokenBalance, signatureData, isLedgerFlow, serverConfig]);
 
   // Auto-trigger verification once message is signed and balance is sufficient
   useEffect(() => {
@@ -670,31 +750,45 @@ export default function VerifyContent() {
       const recentlyCompletedSwap = swapSuccess && shouldShow; // Highlight if swap just finished
 
       if (!shouldShow) return null;
-
+    
       return (
-        <div className={`mt-6 ${recentlyCompletedSwap ? "animate-pulse" : ""}`}>
+        <div className={`mt-6 ${recentlyCompletedSwap ? 'animate-pulse' : ''}`}>
           {recentlyCompletedSwap && (
             <p className="text-green-600 text-sm font-semibold mb-2 text-center">
-              Swap successful! Please sign the message.
+              Your purchase was successful! Please sign the message now.
             </p>
           )}
           <button
             onClick={handleSignMessage}
-            disabled={signingMessage || verifying}
-            className={`w-full px-4 py-3 rounded text-white font-semibold transition duration-200 ${
-              signingMessage || verifying
-                ? "bg-gray-400 cursor-not-allowed"
-                : recentlyCompletedSwap
-                ? "bg-green-600 hover:bg-green-700"
-                : "bg-blue-600 hover:bg-blue-700"
+            disabled={signingMessage || signingTransaction || verifying}
+            className={`w-full px-4 py-3 rounded text-white font-semibold transition duration-200 cursor-pointer ${
+              (signingMessage || signingTransaction || verifying)
+                ? 'bg-gray-400 cursor-not-allowed'
+                : recentlyCompletedSwap 
+                  ? 'bg-green-600 hover:bg-green-700 shadow-md'
+                  : 'bg-[#8151fd] hover:bg-[#8151fd]'
             }`}
           >
-            {signingMessage
-              ? "Waiting for Signature..."
-              : verifying
-              ? "Processing..."
-              : "Sign Message to Verify"}
+            {signingMessage ? 'Waiting for Signature...' : verifying ? 'Processing...' : 'Sign Message to Verify Ownership'}
           </button>
+          
+          <div className="mt-4 text-center">
+            <p className="text-sm text-gray-600 mb-2">Using Ledger hardware wallet?</p>
+            <button
+              onClick={handleSignDummyTransaction}
+              disabled={signingMessage || signingTransaction || verifying}
+              className={`w-full px-4 py-3 rounded text-white font-semibold transition duration-200 cursor-pointer ${
+                (signingMessage || signingTransaction || verifying)
+                  ? 'bg-gray-400 cursor-not-allowed'
+                  : 'bg-blue-600 hover:bg-blue-700'
+              }`}
+            >
+              {signingTransaction ? 'Waiting for Signature...' : verifying ? 'Processing...' : 'Sign Transaction Instead (for Ledger)'}
+            </button>
+            <p className="text-xs text-gray-500 mt-1">
+              This will sign a 0 SOL transaction as an alternative verification method
+            </p>
+          </div>
         </div>
       );
     } catch (e) {
@@ -1075,9 +1169,9 @@ export default function VerifyContent() {
 
               <SignMessageButton />
 
-              {signingMessage && (
+              {(signingMessage || signingTransaction) && (
                 <div className="text-center mt-4 text-gray-600">
-                  <p>Check wallet to sign.</p>
+                  <p>Please check your wallet to {signingTransaction ? 'sign the transaction' : 'sign the message'}...</p>
                 </div>
               )}
               {verifying && (
