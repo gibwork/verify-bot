@@ -1,6 +1,6 @@
 "use server";
 
-import { DISCORD_API_URL } from "@/utils/config";
+import { DISCORD_API_URL, ANNOUNCE_CHANNEL_ID, GUILD_ID } from "@/utils/config";
 
 export const sendDiscordTipAnnounce = async ({
   receiverId,
@@ -16,7 +16,8 @@ export const sendDiscordTipAnnounce = async ({
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       message: `<@${senderId}> just sent **${amount} USDC** to <@${receiverId}>!`,
-      channelId: process.env.ANNOUNCE_CHANNEL_ID,
+      channelId: ANNOUNCE_CHANNEL_ID,
+      guildId: GUILD_ID,
     }),
   });
 };
