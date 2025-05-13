@@ -28,7 +28,7 @@ export async function setupBot() {
         `Successfully reloaded ${data.length} application (/) commands.`
       );
       
-      setInterval(checkAllBalances, 60 * 1000);
+      setInterval(checkAllBalances,5 * 60 * 1000);
       checkAllBalances();
     } catch (error) {
       console.error("Error refreshing application commands:", error);
