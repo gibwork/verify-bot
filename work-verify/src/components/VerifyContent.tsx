@@ -23,6 +23,7 @@ import {
   SwapResponse,
   ServerVerificationConfig,
 } from "@/utils/types";
+import HomePage from "./Landing";
 
 if (!DISCORD_API_URL) {
   console.error(
@@ -66,7 +67,7 @@ export default function VerifyContent() {
 
   const [swapLoading, setSwapLoading] = useState<boolean>(false);
   const [swapSuccess, setSwapSuccess] = useState<boolean>(false);
-  const [swapTxId, setSwapTxId] = useState<string | null>(null); // State to hold the latest tx ID
+  const [swapTxId, setSwapTxId] = useState<string | null>(null);
   const [quoteLoading, setQuoteLoading] = useState<boolean>(false);
   const [quoteData, setQuoteData] = useState<QuoteResponse | null>(null);
   const [quoteError, setQuoteError] = useState<string | null>(null);
@@ -863,10 +864,7 @@ export default function VerifyContent() {
 
   if (!verificationCode) {
     return (
-      <div className="w-full max-w-md bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-        <p className="font-bold">Invalid Link</p>
-        <p>Verification code missing.</p>
-      </div>
+      <HomePage />
     );
   }
 
@@ -909,6 +907,7 @@ export default function VerifyContent() {
     }`;
 
   return (
+    <main  className="flex min-h-screen flex-col items-center justify-center p-4 md:p-24">
     <div className="w-full max-w-md text-black">
       <ToastContainer
         position="top-left"
@@ -924,11 +923,11 @@ export default function VerifyContent() {
       />
 
       <div className="text-center mb-8">
-        <h1 className="text-2xl font-bold text-white">
+        <h1 className="text-2xl text-primary font-bold">
           Discord Role Verification
         </h1>
         {serverConfig.serverName && (
-          <p className="text-lg text-gray-700">
+          <p className="text-lg text-primary ">
             For Server: {serverConfig.serverName}
           </p>
         )}
@@ -1211,5 +1210,6 @@ export default function VerifyContent() {
         </>
       )}
     </div>
+    </main>
   );
 }
