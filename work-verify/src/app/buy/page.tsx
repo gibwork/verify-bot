@@ -363,7 +363,7 @@ export default function SwapPage() {
     <div className="max-w-lg mt-24 md:mt-48 mx-auto p-4 text-black">
       <ToastContainer position="top-left" autoClose={4000} />
 
-      <h1 className="text-2xl md:text-3xl font-bold mb-6 md:mb-8 text-white text-center">
+      <h1 className="text-2xl md:text-3xl font-bold mb-6 md:mb-8 text-primary text-center">
         Buy {tokenSymbol} for {guildName}
       </h1>
 

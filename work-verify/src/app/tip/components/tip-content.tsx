@@ -247,7 +247,7 @@ export function TipContent({ receiverVault }: TipContentProps) {
     <div className="w-full max-w-md">
       <div className="text-center mb-8">
         <h1 className="text-2xl font-bold">Tip @{receiverUsername}</h1>
-        <p className="mt-2 flex items-center text-gray-300">
+        <p className="mt-2 flex items-center text-primary">
           Connect your Solana wallet to tip
           <span className="flex items-center gap-0.5 mx-1">
             <img
