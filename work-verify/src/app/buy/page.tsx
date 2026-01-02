@@ -9,6 +9,7 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { QuoteResponse, SwapResponse } from "@/utils/types";
 import { SOL_MINT, JUPITER_QUOTE_API, JUPITER_SWAP_API } from "@/utils/config";
+import MissingParams from "./components/missing-params";
 
 export default function SwapPage() {
   const { publicKey, sendTransaction } = useWallet();
@@ -39,21 +40,9 @@ export default function SwapPage() {
     const decimalsStr = searchParams.get("tokenDecimals");
     const gName = searchParams.get("guildName");
 
-    let errorMsg = null;
-
-    if (!mint) {
-      errorMsg =
-        "Required token information (tokenMint) is missing in the URL.";
-    }
-    if (!rawAmountStr) {
-      errorMsg = errorMsg
-        ? errorMsg + " Required amount (requiredRawAmount) is also missing."
-        : "Required amount information (requiredRawAmount) is missing in the URL.";
-    }
-
-    if (errorMsg) {
-      setParamsError(errorMsg);
-      toast.error(errorMsg);
+    // Check if required parameters are missing
+    if (!mint || !rawAmountStr) {
+      setParamsError("Missing required parameters");
       setParamsLoaded(true);
       return;
     }
@@ -352,11 +341,7 @@ export default function SwapPage() {
   }
 
   if (paramsError) {
-    return (
-      <div className="max-w-lg mt-48 mx-auto p-4 text-red-500 bg-red-100 border border-red-400 rounded text-center">
-        {paramsError} Please go back to Discord and try the link again.
-      </div>
-    );
+    return <MissingParams />;
   }
 
   return (
