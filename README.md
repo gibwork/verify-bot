@@ -1,4 +1,4 @@
-# Verify Bot
+# Verify Bots
 
 A token verification system for Discord that grants roles based on Solana token holdings. This project consists of two main components:
 
