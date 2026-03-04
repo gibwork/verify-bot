@@ -11,7 +11,26 @@ import { QuoteResponse, SwapResponse } from "@/utils/types";
 import { SOL_MINT, JUPITER_QUOTE_API, JUPITER_SWAP_API } from "@/utils/config";
 
 export default function SwapPage() {
-  const { publicKey, sendTransaction } = useWallet();
+ export default function BuyPage() {
+
+  const searchParams = useSearchParams();
+  const tokenMint = searchParams.get("tokenMint");
+  const requiredRawAmount = searchParams.get("requiredRawAmount");
+
+  if (!tokenMint || !requiredRawAmount) {
+    return (
+      <div>
+        <h1>Invalid Buy Link</h1>
+        <p>This link is missing required information.</p>
+        <p>Please return to Discord and generate a valid link.</p>
+      </div>
+    );
+  }
+
+  return (
+    // existing page content here
+  );
+} const { publicKey, sendTransaction } = useWallet();
   const { connection } = useConnection();
   const searchParams = useSearchParams();
 
